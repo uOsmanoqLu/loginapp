@@ -15,5 +15,7 @@ namespace LoginWebApp.Data
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<City> Cities { get; set; }
+        public DbSet<Region> Regions { get; set; }
     }
 }

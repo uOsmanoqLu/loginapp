@@ -21,7 +21,8 @@ namespace LoginWebApp.Models
         public string Email { get; set; }
         public DateTime BirthDate { get; set; }
         public string Password { get; set; }
-        public string City { get; set; }
-        public string Region { get; set; }
+        public int City { get; set; }
+        public int Region { get; set; }
+        public string Phone { get; set; }
     }
 }

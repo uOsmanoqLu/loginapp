@@ -22,7 +22,8 @@ namespace LoginWebApp.Controllers
         // GET: Users
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Users.ToListAsync());
+            return View();
+            //return View(await _context.Users.ToListAsync());
         }
 
         // GET: Users/Details/5
@@ -46,6 +47,16 @@ namespace LoginWebApp.Controllers
         // GET: Users/Create
         public IActionResult Create()
         {
+            List<City> citiesList = new List<City>();
+            citiesList = _context.Cities.ToList();
+            citiesList.Insert(0, new City { CityCode = 0, Name="Select"});
+            ViewBag.ListOfCity = citiesList;
+
+            List<Region> regionList = new List<Region>();
+            regionList = _context.Regions.ToList();
+            regionList.Insert(0, new Region { Id = 0, RegionName = "Select" });
+            ViewBag.ListOfRegion = regionList;
+
             return View();
         }
 
@@ -54,12 +65,52 @@ namespace LoginWebApp.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Surname,Email,BirthDate,Password,City,Region")] User user)
+        public async Task<IActionResult> Create([Bind("Id,Name,Surname,Email,BirthDate,Password,City,Region,Phone")] User user)
         {
             if (ModelState.IsValid)
             {
                 user.Id = Guid.NewGuid();
                 _context.Add(user);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Index([Bind("Email,Password")] User user)
+        {
+            if (ModelState.IsValid)
+            {
+                User authUser = _context.Users.Where(c => c.Email == user.Email && c.Password == user.Password).SingleOrDefault();
+                if (authUser == null)
+                {
+                    return NotFound("Giriş  Başarısız");
+                }
+                return RedirectToAction("Index", "Home");
+            }
+            return View(user);
+        }
+
+        public async Task<IActionResult> ForgetPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgetPassword([Bind("Email,Password")] User user)
+        {
+            if (ModelState.IsValid)
+            {
+                User authUser = _context.Users.Where(c => c.Email == user.Email).SingleOrDefault();
+                if (authUser == null)
+                {
+                    return NotFound("Giriş  Başarısız");
+                }
+                authUser.Password = user.Password;
+                _context.Update(authUser);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -87,7 +138,7 @@ namespace LoginWebApp.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Name,Surname,Email,BirthDate,Password,City,Region")] User user)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Name,Surname,Email,BirthDate,Password,City,Region,Phone")] User user)
         {
             if (id != user.Id)
             {
